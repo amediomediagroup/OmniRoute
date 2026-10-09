@@ -121,8 +121,8 @@ jobs:
           # and `next` channels are intentionally rebuilt on every matching push.
           SKIP="false"
           if [ "$VERSION" != "main" ] && [ "$VERSION" != "next" ]; then
-            if docker manifest inspect "amediomediagroup/omniroute:${VERSION}" >/dev/null 2>&1; then
-              echo "Image amediomediagroup/omniroute:${VERSION} already exists on Docker Hub — skipping rebuild."
+            if docker manifest inspect "ghcr.io/amediomediagroup/omniroute:${VERSION}" >/dev/null 2>&1; then
+              echo "Image ghcr.io/amediomediagroup/omniroute:${VERSION} already exists on GHCR — skipping rebuild."
               SKIP="true"
             fi
           fi
