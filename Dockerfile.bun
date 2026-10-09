@@ -52,6 +52,17 @@ ENV DASHBOARD_ALLOW_EMBED=$DASHBOARD_ALLOW_EMBED
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_ENV=production
 
+# Mirror the regular Dockerfile's memory-management knobs so the bun builder
+# does not OOM on memory-constrained CI runners (same issue as #4076 / #7518).
+# NODE_OPTIONS caps V8 heap per-process; CIRCLE_NODE_TOTAL limits Next.js
+# page-data collection workers (Next derives the worker count from this var).
+# Default 6144 / 2 workers matches the regular Dockerfile; CI overrides via
+# --build-arg OMNIROUTE_BUILD_MEMORY_MB / OMNIROUTE_BUILD_WORKERS.
+ARG OMNIROUTE_BUILD_MEMORY_MB=6144
+ENV NODE_OPTIONS="--max-old-space-size=${OMNIROUTE_BUILD_MEMORY_MB}"
+ARG OMNIROUTE_BUILD_WORKERS=2
+ENV CIRCLE_NODE_TOTAL=${OMNIROUTE_BUILD_WORKERS}
+
 # Bun native Next.js build execution
 RUN bun run --quiet build
 
@@ -117,8 +128,7 @@ RUN apt-get update \
      chromium \
      chromium-driver \
      fonts-liberation \
-     libasound2t64 \
-     gconf-service \
+     libasound2 \
      libatk-bridge2.0-0 \
      libatk1.0-0 \
      libc6 \
@@ -134,8 +144,8 @@ RUN apt-get update \
      libnspr4 \
      libnss3 \
      libpango-1.0-0 \
-     pangocairo-1.0-0 \
-     stdc++6 \
+     libpangocairo-1.0-0 \
+     libstdc++6 \
      libx11-6 \
      libx11-xcb1 \
      libxcb1 \
@@ -150,7 +160,6 @@ RUN apt-get update \
      libxss1 \
      libxtst6 \
      ca-certificates \
-     fonts-gargi \
      fonts-ipafont-gothic \
      fonts-kacst \
      fonts-thai-tlwg \
